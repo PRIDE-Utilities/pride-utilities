@@ -41,14 +41,12 @@ public class IsoelectricPointUtils {
         private Map<String,Double> Nterm_pI_expasy = new HashMap<>();
         private Map<String, Double> sideGroup_pI_expasy = new HashMap<>();
         private double FoRmU = 0.0D;
-        private String seq = null; // sequenceAA
 
         public BjellpI(){
             fillMaps();
         }
 
         public double calculate(String sequence){
-            this.seq = sequence; // sequenceAA
             final double epsilon = 0.001;
 	        final int iterationMax = 10000;
             int counter = 0;
@@ -59,8 +57,8 @@ public class IsoelectricPointUtils {
             while ((counter < iterationMax) && (Math.abs(pHs - pHe) >= epsilon)) {
                 pHm = (pHs + pHe) / 2;
                 //System.out.println("[" + pHs + ", " + pHm + "]");
-                final double pcs = getpI(Nterm_pI_expasy, Cterm_pI_expasy, sideGroup_pI_expasy, pHs);
-		        final double pcm = getpI(Nterm_pI_expasy, Cterm_pI_expasy, sideGroup_pI_expasy, pHm);
+                final double pcs = getpI(sequence, Nterm_pI_expasy, Cterm_pI_expasy, sideGroup_pI_expasy, pHs);
+		        final double pcm = getpI(sequence, Nterm_pI_expasy, Cterm_pI_expasy, sideGroup_pI_expasy, pHm);
                 if (pcs < 0) {
                     return pHs;
                 }
@@ -76,20 +74,20 @@ public class IsoelectricPointUtils {
 	        return (pHround / 100.0D);
         }
 
-        private double getpI(Map<String,Double> AApI_n, Map<String,Double> AApI_c, Map<String,Double> AApI_side, double PH){
+        private double getpI(String sequence, Map<String,Double> AApI_n, Map<String,Double> AApI_c, Map<String,Double> AApI_side, double PH){
             String sideAA;
             double pHpK;
             double FoRmU = 0.0D;
 
-            String ntermAA = String.valueOf(this.seq.charAt(0));
+            String ntermAA = String.valueOf(sequence.charAt(0));
             pHpK = PH - Double.valueOf(AApI_n.get(ntermAA).toString());
             FoRmU += 1.0D / (1.0D + Math.pow(10.0D, pHpK));
-            String cterm = String.valueOf(this.seq.charAt(this.seq.length() - 1));
+            String cterm = String.valueOf(sequence.charAt(sequence.length() - 1));
             pHpK = Double.valueOf(AApI_c.get(cterm).toString()) - PH;
             FoRmU += -1.0D / (1.0D + Math.pow(10.0D, pHpK));
 
-            for (int t = 0; t < this.seq.length(); ++t) {
-                sideAA = String.valueOf(this.seq.charAt(t));
+            for (int t = 0; t < sequence.length(); ++t) {
+                sideAA = String.valueOf(sequence.charAt(t));
                 if (AApI_side.containsKey(sideAA)) {
                     double value = Double.valueOf(AApI_side.get(sideAA).toString());
                     if (value < 0.0D) {
